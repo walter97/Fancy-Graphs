@@ -1,0 +1,56 @@
+---
+title: "Google Search Trends Graph"
+author: "Walter Ogozaly"
+date: "11/13/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(ggthemes)
+library(gganimate)
+```
+
+
+```{r}
+
+approval <- read.csv("~/RStudio Working Directory/approval_topline_fivethirtyeight.csv")
+head(approval)
+
+approval$modeldate <- paste(str_sub(approval$modeldate,-4,-1),"/",str_sub(approval$modeldate,0,-6),sep="")
+
+approval$modeldate <- as.Date(approval$modeldate)
+
+
+```
+
+
+```{r}
+
+approval_graph <- approval %>%
+  ggplot(aes(x=modeldate,y=approve_estimate, color=subgroup)) +
+  geom_line(size=1.1, alpha=0.8) +
+  labs(title="How many approve of Donald Trump?",
+       subtitle="Approval percentages through most of Trump's first term",
+       x = "Date",
+       y = "Percentage of Population",
+       color="Participants") +
+  theme_fivethirtyeight() +
+  theme(axis.title = element_text())
+
+approval_graph.animation = approval_graph +
+  transition_reveal(modeldate) +
+  view_follow(fixed_y = TRUE)
+
+animate(approval_graph.animation, height=500, width=800, fps=15, duration = 12, end_pause = 60, res = 100) 
+anim_save("myFirstAnimatedGraph.gif")
+
+```
